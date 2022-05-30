@@ -1,5 +1,5 @@
 # SaveSwapper
-A simple game manager for if you have multiple instances of a game (i.e. modded and vanilla) but both share the same save location
+A simple game manager for when you have multiple installations and save profiles of a game (i.e. modded and vanilla) when they share the same save location
 
 # Installation
 1: Download the latest release  
