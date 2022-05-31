@@ -2,6 +2,7 @@
 A simple game manager for when you have multiple installations and save profiles of a game (i.e. modded and vanilla) when they share the same save location
 
 # Installation
+Video Guide:https://www.youtube.com/watch?v=EBFfORrAdOQ  
 1: If you don't already have it, download python here: https://www.python.org/  
 2: Download the latest release  
 3: Extract it somewhere  
