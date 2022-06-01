@@ -4,16 +4,8 @@ import json
 from os.path import exists
 import shutil
 
-#function that finds the difference between 2 arrays
-#used in finding the last used profile and removing it
-
-def Diff(li1, li2):
-    li_dif = [i for i in li1 + li2 if i not in li1 or i not in li2]
-    return li_dif
-
-#return all of the paths from a certain directory
-#includes root in path
-
+# return all of the paths from a certain directory
+# includes root in path
 def getDirPaths(Dir):
     d = os.listdir(Dir)
     dirPaths = []
@@ -21,64 +13,70 @@ def getDirPaths(Dir):
         dirPaths.append(str(f"{Dir}\{d[i]}"))
     return dirPaths
 
-#if the data.json file does not exist it is created here
-#json contains: paths to each shortcut, path to each profile, and the path to the target profile that the program switches
-def init():
-    shortcutPaths = getDirPaths("Shortcuts")
-    profilePaths = getDirPaths("Profiles")
+# unloads the currently loaded profile
+def unload(path):
+    source = path
+    with open("Loaded.json", 'r') as f:
+        destination = json.load(f)
+    shutil.move(source,destination)
+
+# loads the selected profile
+def load(data,gameProfile,gameVersion):
+    source = data['profilePaths'][int(gameProfile)-1]
+    destination = data['targetPath']
+    shutil.move(source,destination)
+    os.startfile(data['shortcutPaths'][int(gameVersion)-1])
+    with open("Loaded.json", 'w') as f:
+        json.dump(source, f)
+
+# creates a Path.json file with the given string
+def InitPath():
     print("Please enter the path to the default profile i.e C:\\Users\\xxxx\\Documents\\Egosoft\X3AP")
-    targetPath = input()
-    data = {
-        'shortcutPaths' : shortcutPaths,
-        'profilePaths' : profilePaths,
-        'targetPath' : targetPath
-    }
-    with open("Data.json", 'w') as f:
-        json.dump(data,f)
-        
-#run init if Data.json doesn't exist
-        
-if not exists("Data.json"):
-    init()
-    
-#read the data from Data.json
-    
-with open("Data.json",'r') as f:
-    data = json.load(f)
-    
-#prompt the user to pick a game version from their list of versions
-    
+    path = input()
+    with open("Path.json", 'w') as f:
+        json.dump(path,f)
+
+#DRIVER CODE
+
+# if Path.json doesn't exist create it using InitPath()
+if not exists("Path.json"):
+    InitPath()
+
+# loads the contents of Path.json into a string
+with open("Path.json",'r') as f:
+    path = json.load(f)
+
+# unload current profile
+if exists("Loaded.json") and exists(path):
+    unload(path)
+
+# stores important data into an easily referenceable dictionary
+data = {
+    'shortcutPaths' : getDirPaths("Shortcuts"),
+    'profilePaths' : getDirPaths("Profiles"),
+    'targetPath' : path
+}
+
+# prompt the user to pick a game version from their list of versions
 print("Select Game Version: ")
 for i in range(len(data["shortcutPaths"])):
     print(f"{i+1}: {data['shortcutPaths'][i][10:][:-4]}")
 gameVersion = input()
 
-#prompt the user to pick a game profile from their list of profiles
-
+# prompt the user to pick a game profile from their list of profiles
 print("Select Game Profile: ")
 for i in range(len(data["profilePaths"])):
     print(f"{i+1}: {data['profilePaths'][i][9:]}")
+print(f"{i+2}: Clear Active Profile")
 gameProfile = input()
 
-#get the last played profile from the difference between the total profiles and the current
+# if the user chooses to clear their active profile, this code runs
+if gameProfile == str(i+2):
+    if exists("Loaded.json"):
+        os.remove("Loaded.json")
+    quit()
 
-currentProfiles = getDirPaths("Profiles")
-totalProfiles = data['profilePaths']
-lastProfile = Diff(totalProfiles, currentProfiles)
+# load the selected profile
+load(data,gameProfile,gameVersion)
 
-#return the last played profile to the profiles folder
 
-if len(lastProfile) != 0:
-    for i in data['profilePaths']:
-        if lastProfile[0] == i:
-            source = data['targetPath']
-            destination = i
-            shutil.move(source,destination)
-            break
-        
-#move the selected profile to the target path
-        
-source = data['profilePaths'][int(gameProfile)-1]
-destination = data['targetPath']
-shutil.move(source,destination)
-os.startfile(data['shortcutPaths'][int(gameVersion)-1])
