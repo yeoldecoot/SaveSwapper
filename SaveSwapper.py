@@ -79,4 +79,3 @@ if gameProfile == str(i+2):
 # load the selected profile
 load(data,gameProfile,gameVersion)
 
-
